@@ -1,4 +1,5 @@
 import { prisma } from "../libs/prisma";
+
 import { v4 as uuid } from "uuid";
 
 export const generateOTP = async (userId: number) => {
