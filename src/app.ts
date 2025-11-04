@@ -2,7 +2,7 @@ import express, { urlencoded } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import { mainRouter } from "./routes/main";
-
+import { prisma } from "./libs/prisma";
 const app = express();
 
 app.use(helmet());
