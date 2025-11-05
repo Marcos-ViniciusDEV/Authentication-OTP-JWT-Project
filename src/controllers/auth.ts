@@ -23,7 +23,7 @@ export const signin: RequestHandler = async (req, res) => {
 
   const otp = await generateOTP(user.id);
 
-  await sendMail(user.email, "Seu código de acesso é" + otp.code, "digite seu codigo" + otp.code);
+  await sendMail(user.email, "Seu código de acesso é " + otp.code, "digite seu codigo " + otp.code);
 
   res.json({ id: otp.id });
 };
@@ -32,7 +32,13 @@ export const signup: RequestHandler = async (req, res) => {
   //Validar os dados recebidos
   const data = authSingUpShchema.safeParse(req.body);
 
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return res.status(400).json({
+      error: "O corpo (body) da requisição está vazio ou não é um JSON válido.",
+    });
+  }
   if (!data.success) {
+    console.log("ERRO ZOD:", data.error.flatten());
     res.json({ error: data.error.flatten().fieldErrors });
     return;
   }
