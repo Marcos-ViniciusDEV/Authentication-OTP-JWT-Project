@@ -2,8 +2,10 @@ import { RequestHandler } from "express";
 import { schema } from "../schemas/auth.signin";
 import { authSingUpShchema } from "../schemas/auth.signup";
 import { createUser, getUserByEmail } from "../services/user";
-import { generateOTP } from "../services/otp";
+import { generateOTP, validateOTP } from "../services/otp";
 import { sendMail } from "../libs/mailTrap";
+import { authUserOtpSchema } from "../schemas/auth-useotp";
+import { createJWT } from "../libs/jwt";
 
 export const signin: RequestHandler = async (req, res) => {
   const data = schema.safeParse(req.body);
@@ -56,4 +58,31 @@ export const signup: RequestHandler = async (req, res) => {
 
   res.status(201).json({ user: newUser });
   //retornar os dados do usuario-criado
+};
+
+export const useOTP: RequestHandler = async (req, res) => {
+  const data = authUserOtpSchema.safeParse(req.body);
+
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return res.status(400).json({
+      error: "O corpo (body) da requisição Precisa ter um json {id:--- , code:---} do OTP",
+    });
+  }
+
+  if (!data.success) {
+    console.log({ error: data.error.flatten() });
+
+    res.json({ error: data.error.flatten().fieldErrors });
+    return;
+  }
+
+  const user = await validateOTP(data.data.id, data.data.code);
+  if (!user) {
+    res.json({ error: "OTP inválido ou expirado" });
+    return;
+  }
+
+  const token = createJWT(user.id);
+
+  res.json({ token, user });
 };

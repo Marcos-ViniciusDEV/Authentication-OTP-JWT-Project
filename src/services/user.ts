@@ -13,3 +13,9 @@ export const createUser = async (name: string, email: string) => {
 
   return user;
 };
+
+export const getUserById = async (id: number) => {
+  return await prisma.user.findFirst({
+    where: { id },
+  });
+};
